@@ -3,4 +3,4 @@ uvicorn
 python-multipart
 opencv-python-headless
 mediapipe
-tensorflow
+tensorflow-cpu
