@@ -43,7 +43,9 @@ print("✅ 模型加载完成！")
 # 3. FastAPI 核心接口
 # ==========================================
 app = FastAPI()
-
+@app.get("/")
+def health_check():
+    return {"status": "alive", "message": "Server is running perfectly!"}
 @app.get("/ping")
 def ping_server():
     print("🚀 [最高优先级] 服务器收到 ping 请求，正在响应！")
