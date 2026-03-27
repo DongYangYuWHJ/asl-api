@@ -27,6 +27,14 @@ model = load_model('action.h5') # 直接加载他现成的权重！
 # ==========================================
 # 3. 核心 API 接口
 # ==========================================
+
+# 👇 插入这段探活代码 👇
+@app.get("/ping")
+def ping_server():
+    print("🚀 [最高优先级] 服务器收到 ping 请求，正在响应！")
+    return {"status": "success", "message": "服务器网络和框架完美运行中！"}
+# 👆 插入结束 👆
+
 @app.post("/translate")
 async def translate_video(file: UploadFile = File(...)):
     temp_video_path = f"temp_{file.filename}"
