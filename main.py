@@ -29,37 +29,44 @@ model = load_model('action.h5') # 直接加载他现成的权重！
 # ==========================================
 @app.post("/translate")
 async def translate_video(file: UploadFile = File(...)):
-    # a. 把手机传来的视频存到服务器本地临时文件
     temp_video_path = f"temp_{file.filename}"
     with open(temp_video_path, "wb") as buffer:
         buffer.write(await file.read())
+        
+    print(f"✅ [探头1] 视频已存入云端: {temp_video_path}") 
 
-    # b. 核心推断逻辑：读取视频 -> 抽帧 -> 进模型
     sequence = []
     cap = cv2.VideoCapture(temp_video_path)
     
+    if not cap.isOpened():
+        print("❌ [探头2] 糟糕！OpenCV 无法打开这个视频文件！") 
+        return {"status": "error", "message": "云端无法解码该视频"}
+
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
-                break # 视频读完了
+                print("✅ [探头3] 视频画面已全部读取完毕") 
+                break 
             
-            # 把帧喂给 MediaPipe
             image, results = mediapipe_detection(frame, holistic)
             keypoints = extract_keypoints(results)
             sequence.append(keypoints)
 
-            # 为了匹配作者的模型，只取前 30 帧（或者根据实际情况处理长度）
             if len(sequence) == 30:
                 break
                 
     cap.release()
-    os.remove(temp_video_path) # 阅后即焚，删掉临时视频
+    os.remove(temp_video_path)
+    
+    print(f"📊 [探头4] 最终成功提取到的视频帧数: {len(sequence)}") 
 
-    # c. 预测并返回结果
     if len(sequence) == 30:
         res = model.predict(np.expand_dims(sequence, axis=0))[0]
         best_word = actions[np.argmax(res)]
+        print(f"🎉 [探头5] 预测成功，结果是: {best_word}")
         return {"status": "success", "gloss": best_word}
     else:
-        return {"status": "error", "message": "视频太短或无法识别"}
+        # 这里就是你之前可能漏掉的兜底 return
+        print("⚠️ [探头6] 帧数不足 30 帧，无法进行 AI 预测！")
+        return {"status": "error", "message": f"视频太短或画面无法识别，只提取到了 {len(sequence)} 帧"}
