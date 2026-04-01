@@ -1,3 +1,21 @@
+# === Python & 缓存 ===
 __pycache__/
+*.pyc
+
+# === 巨型 AI 模型与权重 (绝对不能传) ===
+my_model_weights/
+*.h5
+*.safetensors
+*.bin
+
+# === 临时测试媒体文件 ===
 *.mp4
+*.jpg
+*.png
+
+# === Jupyter Notebook 缓存 ===
 .ipynb_checkpoints/
+
+# === 系统环境文件 ===
+.env
+.DS_Store
